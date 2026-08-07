@@ -1,10 +1,8 @@
 from telethon import TelegramClient, events
-import asyncio
 
 api_id = 32059999
 api_hash = '848e4041e84bff7907db68fd7ac3c37b'  # جدید بذار
 
-# از فایل session ای که الان ساخته شده استفاده کن
 client = TelegramClient('session.session', api_id, api_hash)
 
 @client.on(events.NewMessage(incoming=True))
@@ -19,8 +17,7 @@ async def news_handler(event):
 
 async def main():
     await client.start()
-    print('✅ ربات روشن شد! (با session ذخیره‌شده)')
+    print('✅ ربات روشن شد!')
     await client.run_until_disconnected()
 
-if __name__ == '__main__':
-    client.loop.run_until_complete(main())
+client.loop.run_until_complete(main())
