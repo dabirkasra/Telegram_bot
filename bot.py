@@ -1,7 +1,8 @@
 from telethon import TelegramClient, events
+import asyncio
 
 api_id = 32059999
-api_hash = '848e4041e84bff7907db68fd7ac3c37b'  # با جدیدش عوض کن
+api_hash = '848e4041e84bff7907db68fd7ac3c37b'  # جدید بذار
 
 client = TelegramClient('session.session', api_id, api_hash)
 
@@ -16,9 +17,12 @@ async def news_handler(event):
         await event.reply('📰 آخرین اخبار: اینجا خبر میاد...')
 
 async def main():
-    await client.start()
-    print('✅ ربات روشن شد!')
-    await client.run_until_disconnected()
+    try:
+        await client.start()
+        print('✅ ربات روشن شد!')
+        await client.run_until_disconnected()
+    except Exception as e:
+        print(f'❌ خطا: {e}')
 
 if __name__ == '__main__':
-    client.loop.run_until_complete(main())
+    asyncio.run(main())
