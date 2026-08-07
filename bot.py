@@ -1,7 +1,7 @@
 from telethon import TelegramClient, events
 
 api_id = 32059999
-api_hash = '848e4041e84bff7907db68fd7ac3c37b'  # جدید بذار
+api_hash = '848e4041e84bff7907db68fd7ac3c37b'  # با جدیدش عوض کن
 
 client = TelegramClient('session.session', api_id, api_hash)
 
@@ -20,4 +20,5 @@ async def main():
     print('✅ ربات روشن شد!')
     await client.run_until_disconnected()
 
-client.loop.run_until_complete(main())
+if __name__ == '__main__':
+    client.loop.run_until_complete(main())
