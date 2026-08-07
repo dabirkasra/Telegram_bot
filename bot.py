@@ -17,12 +17,9 @@ async def news_handler(event):
         await event.reply('📰 آخرین اخبار: اینجا خبر میاد...')
 
 async def main():
-    try:
-        await client.start()
-        print('✅ ربات روشن شد!')
-        await client.run_until_disconnected()
-    except Exception as e:
-        print(f'❌ خطا: {e}')
+    await client.start()
+    print('✅ ربات روشن شد!')
+    await client.run_until_disconnected()
 
 if __name__ == '__main__':
     asyncio.run(main())
