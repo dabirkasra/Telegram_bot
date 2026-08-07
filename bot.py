@@ -3,9 +3,9 @@ import asyncio
 
 api_id = 32059999
 api_hash = '848e4041e84bff7907db68fd7ac3c37b'  # جدید بذار
-phone = '918527529308'  # شماره خودت
 
-client = TelegramClient('session', api_id, api_hash)
+# از فایل session ای که الان ساخته شده استفاده کن
+client = TelegramClient('session.session', api_id, api_hash)
 
 @client.on(events.NewMessage(incoming=True))
 async def auto_reply(event):
@@ -18,12 +18,9 @@ async def news_handler(event):
         await event.reply('📰 آخرین اخبار: اینجا خبر میاد...')
 
 async def main():
-    try:
-        await client.start(phone=phone)
-        print('✅ ربات روشن شد!')
-        await client.run_until_disconnected()
-    except Exception as e:
-        print(f'❌ خطا: {e}')
+    await client.start()
+    print('✅ ربات روشن شد! (با session ذخیره‌شده)')
+    await client.run_until_disconnected()
 
 if __name__ == '__main__':
     client.loop.run_until_complete(main())
