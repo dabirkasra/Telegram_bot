@@ -4,6 +4,7 @@ import asyncio
 api_id = 32059999
 api_hash = '848e4041e84bff7907db68fd7ac3c37b'  # جدید بذار
 
+# از فایل session استفاده کن
 client = TelegramClient('session.session', api_id, api_hash)
 
 @client.on(events.NewMessage(incoming=True))
