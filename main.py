@@ -15,7 +15,6 @@ ai_client = OpenAI(
     base_url="https://api.openai.com/v1"
 )
 
-# ======== اتصال با تنظیمات ساده ========
 app = Client(
     "userbot",
     api_id=API_ID,
@@ -23,21 +22,19 @@ app = Client(
     session_string=SESSION_STRING
 )
 
-# ======== دریافت همه پیام‌ها با ساده‌ترین فیلتر ========
 @app.on_message()
 async def all_messages(client, message):
-    logging.info(f"📩 پیام دریافت شد: {message.text}")
+    logging.info(f"📩 پیام از: {message.chat.type} | متن: {message.text}")
     
-    # نادیده گرفتن پیام‌های خودم
     if message.from_user.is_self:
         return
     
-    # فقط پیام‌های متنی
     if not message.text:
         return
-    
-    # فقط پیوی
+
+    # ======== فقط به پیوی پاسخ بده ========
     if message.chat.type != "private":
+        logging.info("⏭️ گروه یا کانال، نادیده گرفتم")
         return
 
     try:
@@ -56,5 +53,5 @@ async def all_messages(client, message):
         await message.reply(f"❌ خطا: {str(e)}")
 
 if __name__ == "__main__":
-    print("🤖 یوزر بات روشن شد!")
+    print("🤖 یوزر بات فقط به پیوی پاسخ میدهد!")
     app.run()
