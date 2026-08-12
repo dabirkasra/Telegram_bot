@@ -25,13 +25,20 @@ app = Client(
     no_updates=True
 )
 
-@app.on_message(filters.private & filters.text)
-async def private_chat(client, message):
-    # این خط رو حتماً توی لاگ میبینی
-    logging.info(f"📩 پیام جدید از {message.from_user.id}: {message.text}")
+# ======== دریافت همه پیام‌های متنی ========
+@app.on_message(filters.text)
+async def all_messages(client, message):
+    # لاگ برای دیباگ
+    logging.info(f"📩 پیام از: {message.from_user.id} | چت: {message.chat.id} | متن: {message.text}")
     
+    # اگه پیام از خودم بود، نادیده بگیر
     if message.from_user.is_self:
-        logging.info("⏭️ پیام از خودم بود، نادیده گرفتم")
+        logging.info("⏭️ پیام از خودم")
+        return
+    
+    # فقط به پیام‌های خصوصی پاسخ بده (گروه رو نادیده بگیر)
+    if message.chat.type not in ["private"]:
+        logging.info("⏭️ گروه یا کانال، نادیده گرفتم")
         return
 
     try:
@@ -48,7 +55,7 @@ async def private_chat(client, message):
         )
         
         reply = response.choices[0].message.content
-        logging.info(f"✅ پاسخ دریافت شد: {reply[:30]}...")
+        logging.info(f"✅ پاسخ: {reply[:30]}...")
         await message.reply(reply)
         
     except Exception as e:
