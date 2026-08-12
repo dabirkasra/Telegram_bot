@@ -1,6 +1,7 @@
 import os
 import logging
 from pyrogram import Client, filters
+from pyrogram.enums import ChatType
 from openai import OpenAI
 
 logging.basicConfig(level=logging.INFO)
@@ -24,26 +25,21 @@ app = Client(
 
 @app.on_message()
 async def all_messages(client, message):
-    # چاپ کامل اطلاعات برای دیباگ
-    logging.info(f"📩 پیام از: {message.chat.type} | آیدی چت: {message.chat.id} | متن: {message.text}")
+    logging.info(f"📩 پیام از: {message.chat.type} | متن: {message.text}")
     
-    # نادیده گرفتن پیام‌های خودم
     if message.from_user.is_self:
-        logging.info("⏭️ پیام از خودم")
         return
     
-    # فقط پیام‌های متنی
     if not message.text:
-        logging.info("⏭️ پیام غیر متنی")
         return
 
-    # ======== فقط پیوی ========
-    if message.chat.type != "private":
-        logging.info(f"⏭️ گروه یا کانال (نوع: {message.chat.type})، نادیده گرفتم")
+    # ======== فقط پیوی با استفاده از ChatType.PRIVATE ========
+    if message.chat.type != ChatType.PRIVATE:
+        logging.info("⏭️ گروه یا کانال، نادیده گرفتم")
         return
+
+    logging.info("✅ پیوی شناسایی شد!")
     
-    logging.info("✅ پیوی شناسایی شد! در حال پردازش...")
-
     try:
         await client.send_chat_action(message.chat.id, "typing")
         response = ai_client.chat.completions.create(
@@ -55,12 +51,9 @@ async def all_messages(client, message):
             max_tokens=1000
         )
         await message.reply(response.choices[0].message.content)
-        logging.info("✅ پاسخ ارسال شد")
         
     except Exception as e:
-        error_msg = f"❌ خطا: {str(e)}"
-        logging.error(error_msg)
-        await message.reply(error_msg)
+        await message.reply(f"❌ خطا: {str(e)}")
 
 if __name__ == "__main__":
     print("🤖 یوزر بات فقط به پیوی پاسخ میدهد!")
