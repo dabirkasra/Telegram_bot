@@ -15,36 +15,33 @@ ai_client = OpenAI(
     base_url="https://api.openai.com/v1"
 )
 
+# ======== اتصال با تنظیمات ساده ========
 app = Client(
     "userbot",
     api_id=API_ID,
     api_hash=API_HASH,
-    session_string=SESSION_STRING,
-    workdir="./",
-    sleep_threshold=60,
-    no_updates=True
+    session_string=SESSION_STRING
 )
 
-# ======== دریافت همه پیام‌های متنی ========
-@app.on_message(filters.text)
+# ======== دریافت همه پیام‌ها با ساده‌ترین فیلتر ========
+@app.on_message()
 async def all_messages(client, message):
-    # لاگ برای دیباگ
-    logging.info(f"📩 پیام از: {message.from_user.id} | چت: {message.chat.id} | متن: {message.text}")
+    logging.info(f"📩 پیام دریافت شد: {message.text}")
     
-    # اگه پیام از خودم بود، نادیده بگیر
+    # نادیده گرفتن پیام‌های خودم
     if message.from_user.is_self:
-        logging.info("⏭️ پیام از خودم")
         return
     
-    # فقط به پیام‌های خصوصی پاسخ بده (گروه رو نادیده بگیر)
-    if message.chat.type not in ["private"]:
-        logging.info("⏭️ گروه یا کانال، نادیده گرفتم")
+    # فقط پیام‌های متنی
+    if not message.text:
+        return
+    
+    # فقط پیوی
+    if message.chat.type != "private":
         return
 
     try:
-        await client.send_chat_action(chat_id=message.chat.id, action="typing")
-        
-        logging.info("🤖 ارسال به OpenAI...")
+        await client.send_chat_action(message.chat.id, "typing")
         response = ai_client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
@@ -53,15 +50,10 @@ async def all_messages(client, message):
             ],
             max_tokens=1000
         )
-        
-        reply = response.choices[0].message.content
-        logging.info(f"✅ پاسخ: {reply[:30]}...")
-        await message.reply(reply)
+        await message.reply(response.choices[0].message.content)
         
     except Exception as e:
-        error_msg = f"❌ خطا: {str(e)}"
-        logging.error(error_msg)
-        await message.reply(error_msg)
+        await message.reply(f"❌ خطا: {str(e)}")
 
 if __name__ == "__main__":
     print("🤖 یوزر بات روشن شد!")
