@@ -42,5 +42,5 @@ async def private_chat(client, message):
         await message.reply(f"❌ خطا: {e}")
 
 if __name__ == "__main__":
-    print("🤖 فقط پیوی!")
+    print("🤖 مفقط پیوی!")
     app.run()
