@@ -3,22 +3,22 @@ import logging
 
 from pyrogram import Client, filters
 from pyrogram.enums import ChatAction
-from openai import OpenAI
+from google import genai
 
 logging.basicConfig(level=logging.INFO)
 
-# Environment Variables
+# Telegram
 API_ID = int(os.environ.get("API_ID", "0"))
 API_HASH = os.environ.get("API_HASH", "")
 SESSION_STRING = os.environ.get("SESSION_STRING", "")
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 
-# OpenAI
-ai_client = OpenAI(
-    api_key=OPENAI_API_KEY
-)
+# Gemini
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 
-# Pyrogram
+# Gemini client
+ai_client = genai.Client(api_key=GEMINI_API_KEY)
+
+# Telegram client
 app = Client(
     "userbot",
     api_id=API_ID,
@@ -29,43 +29,53 @@ app = Client(
 
 @app.on_message(filters.private & filters.text)
 async def private_chat(client, message):
+
     if message.from_user and message.from_user.is_self:
         return
 
     try:
-        # نمایش حالت تایپ کردن
+        # نمایش حالت typing
         await client.send_chat_action(
             chat_id=message.chat.id,
             action=ChatAction.TYPING
         )
 
-        # درخواست از OpenAI
-        response = ai_client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "تو یک دستیار هوشمند و مفید هستی."
-                },
+        # درخواست به Gemini
+        response = ai_client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=[
                 {
                     "role": "user",
-                    "content": message.text
+                    "parts": [
+                        {
+                            "text": (
+                                "تو یک دستیار هوشمند و مفید هستی. "
+                                "به زبان فارسی و به شکل دوستانه پاسخ بده.\n\n"
+                                f"پیام کاربر:\n{message.text}"
+                            )
+                        }
+                    ]
                 }
             ]
         )
 
-        answer = response.choices[0].message.content
+        answer = response.text
 
         if answer:
             await message.reply_text(answer)
         else:
-            await message.reply_text("❌ پاسخی از هوش مصنوعی دریافت نشد.")
+            await message.reply_text(
+                "❌ Gemini پاسخی برنگرداند."
+            )
 
     except Exception as e:
-        logging.exception("Error:")
-        await message.reply_text(f"❌ خطا: {e}")
+        logging.exception("Gemini error")
+
+        await message.reply_text(
+            f"❌ خطا: {e}"
+        )
 
 
 if __name__ == "__main__":
-    print("🤖 Userbot is running...")
+    print("🤖 Userbot with Gemini is running...")
     app.run()
