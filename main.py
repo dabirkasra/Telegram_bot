@@ -1,7 +1,6 @@
 import os
 import logging
 from pyrogram import Client, filters
-from pyrogram.enums import ChatType
 from openai import OpenAI
 
 logging.basicConfig(level=logging.INFO)
@@ -33,8 +32,8 @@ async def all_messages(client, message):
     if not message.text:
         return
 
-    # ======== فقط پیوی ========
-    if message.chat.type != ChatType.PRIVATE:
+    # ======== فقط پیوی با مقایسه مستقیم ========
+    if str(message.chat.type) != "ChatType.PRIVATE":
         logging.info("⏭️ گروه یا کانال، نادیده گرفتم")
         return
 
