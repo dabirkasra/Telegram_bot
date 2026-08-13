@@ -33,13 +33,11 @@ async def all_messages(client, message):
     if not message.text:
         return
 
-    # ======== فقط پیوی با استفاده از ChatType.PRIVATE ========
+    # ======== فقط پیوی ========
     if message.chat.type != ChatType.PRIVATE:
         logging.info("⏭️ گروه یا کانال، نادیده گرفتم")
         return
 
-    logging.info("✅ پیوی شناسایی شد!")
-    
     try:
         await client.send_chat_action(message.chat.id, "typing")
         response = ai_client.chat.completions.create(
@@ -56,5 +54,5 @@ async def all_messages(client, message):
         await message.reply(f"❌ خطا: {str(e)}")
 
 if __name__ == "__main__":
-    print("🤖 یوزر بات فقط به پیوی پاسخ میدهد!")
+    print("🤖 فقط پیوی!")
     app.run()
