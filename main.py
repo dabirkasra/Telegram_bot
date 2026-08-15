@@ -14,35 +14,37 @@ ai_client = OpenAI(api_key=OPENAI_API_KEY, base_url="https://api.openai.com/v1")
 
 app = Client("userbot", api_id=API_ID, api_hash=API_HASH, session_string=SESSION_STRING)
 
-SPECIAL_CHAT_ID = 123456789  # آیدی عددی اون شخص خاص رو بذار اینجا
-OFF_FOR_SPECIAL = False
+# ======== اینجا آیدی خودت رو بذار (یه بار بگیر) ========
+MY_ID = 123456789  # آیدی خودت رو با @userinfobot بگیر
+
+# ======== لیست چت‌هایی که فقط خودت میتونی خاموش کنی ========
+off_chats = set()
 
 @app.on_message(filters.private & filters.text)
 async def private_chat(client, message):
-    global OFF_FOR_SPECIAL
     if message.from_user.is_self:
         return
 
     chat_id = message.chat.id
+    user_id = message.from_user.id
 
-    # ======== دستورات فقط برای اون چت خاص ========
-    if chat_id == SPECIAL_CHAT_ID:
-        if message.text == "/off":
-            OFF_FOR_SPECIAL = True
-            await message.reply("🔇 خاموش شد!")
-            return
+    # ======== دستور خاموش کردن (فقط برای خودت) ========
+    if message.text.startswith("/off") and user_id == MY_ID:
+        off_chats.add(chat_id)
+        await message.reply("🔇 ربات در این چت خاموش شد!")
+        return
 
-        if message.text == "/on":
-            OFF_FOR_SPECIAL = False
-            await message.reply("🔊 روشن شد!")
-            return
+    if message.text.startswith("/on") and user_id == MY_ID:
+        off_chats.discard(chat_id)
+        await message.reply("🔊 ربات در این چت روشن شد!")
+        return
 
-        if OFF_FOR_SPECIAL:
-            return
+    # ======== اگه چت توی لیست خاموشی‌هاست، جواب نده ========
+    if chat_id in off_chats:
+        return
 
-    # ======== پاسخ به همه ========
+    # ======== پاسخ به بقیه ========
     try:
-        # بدون send_chat_action تا خطا نده
         response = ai_client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": message.text}]
