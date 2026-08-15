@@ -15,7 +15,7 @@ ai_client = OpenAI(api_key=OPENAI_API_KEY, base_url="https://api.openai.com/v1")
 app = Client("userbot", api_id=API_ID, api_hash=API_HASH, session_string=SESSION_STRING)
 
 # ======== اینجا آیدی خودت رو بذار (یه بار بگیر) ========
-MY_ID = 123456789  # آیدی خودت رو با @userinfobot بگیر
+MY_ID = 8943898299  # آیدی خودت رو با @userinfobot بگیر
 
 # ======== لیست چت‌هایی که فقط خودت میتونی خاموش کنی ========
 off_chats = set()
