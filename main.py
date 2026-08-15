@@ -14,8 +14,8 @@ ai_client = OpenAI(api_key=OPENAI_API_KEY, base_url="https://api.openai.com/v1")
 
 app = Client("userbot", api_id=API_ID, api_hash=API_HASH, session_string=SESSION_STRING)
 
-SPECIAL_CHAT_ID = 123456789  # آیدی اون شخص خاص
-OFF_FOR_SPECIAL = False  # وضعیت خاموشی فقط برای اون چت
+SPECIAL_CHAT_ID = 123456789  # آیدی عددی اون شخص خاص رو بذار اینجا
+OFF_FOR_SPECIAL = False
 
 @app.on_message(filters.private & filters.text)
 async def private_chat(client, message):
@@ -29,21 +29,20 @@ async def private_chat(client, message):
     if chat_id == SPECIAL_CHAT_ID:
         if message.text == "/off":
             OFF_FOR_SPECIAL = True
-            await message.reply("🔇 ربات در این چت خاموش شد!")
+            await message.reply("🔇 خاموش شد!")
             return
 
         if message.text == "/on":
             OFF_FOR_SPECIAL = False
-            await message.reply("🔊 ربات در این چت روشن شد!")
+            await message.reply("🔊 روشن شد!")
             return
 
-        # اگه اون چت خاموشه، جواب نده
         if OFF_FOR_SPECIAL:
             return
 
-    # ======== بقیه پیوی‌ها و اون چت (اگه خاموش نباشه) ========
+    # ======== پاسخ به همه ========
     try:
-        await client.send_chat_action(chat_id, "typing")
+        # بدون send_chat_action تا خطا نده
         response = ai_client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": message.text}]
@@ -53,5 +52,5 @@ async def private_chat(client, message):
         await message.reply(f"❌ {e}")
 
 if __name__ == "__main__":
-    print("🤖 ربات در همه پیوی‌ها فعال است!")
+    print("🤖 ربات فعاله!")
     app.run()
