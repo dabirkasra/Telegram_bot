@@ -1,100 +1,57 @@
 import os
 import logging
-
 from pyrogram import Client, filters
-from pyrogram.enums import ChatAction
 from openai import OpenAI
 
 logging.basicConfig(level=logging.INFO)
 
-# =========================
-# Environment Variables
-# =========================
-
-API_ID = int(os.environ.get("API_ID", "0"))
+API_ID = int(os.environ.get("API_ID", 0))
 API_HASH = os.environ.get("API_HASH", "")
 SESSION_STRING = os.environ.get("SESSION_STRING", "")
-OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 
-# =========================
-# OpenRouter
-# =========================
+ai_client = OpenAI(api_key=OPENAI_API_KEY, base_url="https://api.openai.com/v1")
 
-ai_client = OpenAI(
-    api_key=OPENROUTER_API_KEY,
-    base_url="https://openrouter.ai/api/v1"
-)
+app = Client("userbot", api_id=API_ID, api_hash=API_HASH, session_string=SESSION_STRING)
 
-# =========================
-# Telegram
-# =========================
-
-app = Client(
-    "userbot",
-    api_id=API_ID,
-    api_hash=API_HASH,
-    session_string=SESSION_STRING
-)
-
-
-# =========================
-# Private Messages
-# =========================
+SPECIAL_CHAT_ID = 123456789  # آیدی اون شخص خاص
+OFF_FOR_SPECIAL = False  # وضعیت خاموشی فقط برای اون چت
 
 @app.on_message(filters.private & filters.text)
 async def private_chat(client, message):
-
-    if message.from_user and message.from_user.is_self:
+    global OFF_FOR_SPECIAL
+    if message.from_user.is_self:
         return
 
+    chat_id = message.chat.id
+
+    # ======== دستورات فقط برای اون چت خاص ========
+    if chat_id == SPECIAL_CHAT_ID:
+        if message.text == "/off":
+            OFF_FOR_SPECIAL = True
+            await message.reply("🔇 ربات در این چت خاموش شد!")
+            return
+
+        if message.text == "/on":
+            OFF_FOR_SPECIAL = False
+            await message.reply("🔊 ربات در این چت روشن شد!")
+            return
+
+        # اگه اون چت خاموشه، جواب نده
+        if OFF_FOR_SPECIAL:
+            return
+
+    # ======== بقیه پیوی‌ها و اون چت (اگه خاموش نباشه) ========
     try:
-
-        # نمایش حالت typing
-        await client.send_chat_action(
-            chat_id=message.chat.id,
-            action=ChatAction.TYPING
-        )
-
-        # ارسال پیام به OpenRouter
+        await client.send_chat_action(chat_id, "typing")
         response = ai_client.chat.completions.create(
-            model="openrouter/free",
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "تو یک دستیار هوشمند و مفید هستی. "
-                        "به زبان فارسی و دوستانه پاسخ بده."
-                    )
-                },
-                {
-                    "role": "user",
-                    "content": message.text
-                }
-            ]
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": message.text}]
         )
-
-        answer = response.choices[0].message.content
-
-        if answer:
-            await message.reply_text(answer)
-        else:
-            await message.reply_text(
-                "❌ پاسخی از هوش مصنوعی دریافت نشد."
-            )
-
+        await message.reply(response.choices[0].message.content)
     except Exception as e:
-
-        logging.exception("OpenRouter error")
-
-        await message.reply_text(
-            f"❌ خطا: {e}"
-        )
-
-
-# =========================
-# Start
-# =========================
+        await message.reply(f"❌ {e}")
 
 if __name__ == "__main__":
-    print("🤖 Telegram AI Userbot is running...")
+    print("🤖 ربات در همه پیوی‌ها فعال است!")
     app.run()
